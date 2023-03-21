@@ -26,10 +26,11 @@ const main = async () => {
     res.send("Working! Hello world!");
   });
 
+  //app wil lbe using cors. 
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN,
-      credentials: true,
+      origin: process.env.CORS_ORIGIN, //origin can be set to your app specifications.
+      credentials: true, 
     })
   );
 
@@ -55,9 +56,9 @@ const main = async () => {
         sameSite: "lax", //must be changed to lax for prod
         // domain: __prod__ ? ".yourdomainhere.com" : undefined,
       },
-      saveUninitialized: false,
-      secret: process.env.SESSION_SECRET as string,
-      resave: false,
+      saveUninitialized: false, //usually false if using express-session
+      secret: process.env.SESSION_SECRET as string, //this app does not set cookies, but if it did, this would be needed
+      resave: false, //set to false because disable touch is true
     })
   );
 
