@@ -1,0 +1,104 @@
+#Lists all services
+services:
+  frontend:
+    #names the container
+    container_name: frontend_container
+    #specifices the Dockerfile location for the build
+    build: ./web
+    #maps port 3000 on localhost to port 3000 when dockerized. Can be changed.
+    ports:
+      - 3000:3000
+
+  backend:
+    container_name: backend_container
+    #Build location of Dockerfile is ./backend
+    build: ./backend
+    #Mapping port 4000 to 4000
+    ports:
+      - 4000:4000
+    #You can set environment variables here for your app
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+    #Specifices that this service depends on the postgres service
+    depends_on:
+      - postgres
+    #links to postgres and redis services
+    links:
+      - postgres
+      - redis
+    #on the network "mynet"
+    networks:
+      - mynet
+    #You may need node_modules present in the environment
+    #this line is needed for the typeorm data-sources connection
+    volumes:
+      - /usr/src/app/node_modules
+
+  postgres:
+    container_name: postgres
+    #using the postgres image
+    image: postgres
+    #Volume will restart on failure
+    restart: always
+    #More environment variables
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    #port 5432 mapped to 5432
+    ports:
+      - "5432:5432"
+    #volume postgres-data mapped from /var/lib/postgresql/data, the default location for postgresql
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    #created a network for the service. will be default if not specified.
+    networks:
+      - mynet
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    networks:
+      - mynet
+    #maps volume pgadmin-data from /var/lib/pgadmin, the default location
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  redis:
+    image: redis
+    container_name: redis
+    #port may need to be exposed for certain applications
+    #6379 is the default redis port
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+    networks:
+      - mynet
+    #maps volume redis-data from /data, the default location
+    volumes:
+      - redis-data:/data
+
+#lists the volumes needed for this docker-compose file. will be using local drivers
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  pgadmin-data:
+    driver: local
+
+#User defined brideges provide automatic DNS resolution between containers on the network
+networks:
+  mynet:
+    driver: bridge
