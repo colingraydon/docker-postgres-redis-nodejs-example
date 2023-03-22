@@ -25,7 +25,12 @@ services:
       DB_NAME: postgres
     #Specifices that this service depends on the postgres service
     depends_on:
-      - postgres
+      postgres:
+        #ensures that the service is running before a connection is attempted.
+        #if this line is removed, the first time you run docker-compose up --build,
+        #the backend will attempt the typeorm connection to postgres before the database is ready
+        #for connections. this health check will make it wait until the db is ready
+        condition: service_healthy
     #links to postgres and redis services
     links:
       - postgres
@@ -58,6 +63,14 @@ services:
     #created a network for the service. will be default if not specified.
     networks:
       - mynet
+    #runs the health check required by the backend.
+    #if this is removed, the very first build will have a failed connections, but
+    #future builds will not. this healthcheck ensures a successful first postgres connection
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4
