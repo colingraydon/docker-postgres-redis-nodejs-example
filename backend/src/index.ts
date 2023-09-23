@@ -23,14 +23,14 @@ const main = async () => {
 
   //basic get request
   app.get("/", (_, res) => {
-    res.send("Working! Hello world!");
+    res.send("This is a test!");
   });
 
-  //app wil lbe using cors. 
+  //app wil lbe using cors.
   app.use(
     cors({
       origin: process.env.CORS_ORIGIN, //origin can be set to your app specifications.
-      credentials: true, 
+      credentials: true,
     })
   );
 
